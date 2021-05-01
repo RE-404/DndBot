@@ -6,7 +6,6 @@ const Database = require('better-sqlite3');
 const express = require('express');
 const exp = express();
 const ejs = require('ejs');
-const db = new Database('./DB/Schede.db', { verbose: console.log });
 const port = process.env.PORT || 3000;
 const bot = new TelegramBot(token, {
     polling: true
@@ -85,8 +84,8 @@ bot.onText(/\/roll/, (msg, match) => {
 //#endregion
 
 bot.onText(/\/caricascheda/, (msg) => {
-    console.log(msg.chat.id);
-    bot.sendMessage(msg.chat.id, "Scrivi il nome e la razza del personaggio che vuoi caricare")
+    const db = new Database('./DB/Schede.db', { verbose: console.log });
+    bot.sendMessage(msg.chat.id, "Scrivi il nome, la razza e la classe del personaggio che vuoi caricare")
     const row = db.prepare('SELECT Nome, Razza, Classe FROM scheda INNER JOIN utente ON utente.idUtente=scheda.fkUtente WHERE utente.chatid = ?').all(msg.chat.id);
     if (row) {
         let ans = "";
@@ -113,10 +112,11 @@ bot.onText(/\/caricascheda/, (msg) => {
         bot.sendMessage(msg.chat.id, "Non hai schede");
         return;
     }
-
+    db.close();
 });
 
 bot.onText(/\/register/, (msg) => {
+    const db = new Database('./DB/Schede.db', { verbose: console.log });
     bot.sendMessage(msg.chat.id, "Scrivi il tuo username e la password (spazi in user e password non consentiti, usa i _)");
     let handler = (msg) => {
         let spl = msg.text.split(" ");
@@ -134,6 +134,7 @@ bot.onText(/\/register/, (msg) => {
         bot.removeListener("message", handler);
     };
     bot.on("message", handler);
+    db.close();
 });
 
 //#region magic related stuff
@@ -314,6 +315,7 @@ exp.post("/", function(req, res) {
 
 exp.post("/insertscheda", function(req, res) {
     if (req.body) {
+        const db = new Database('./DB/Schede.db', { verbose: console.log });
         let modde, modco;
         modde = DeterminaMod(parseInt(req.body.dex));
         modco = DeterminaMod(parseInt(req.body.con));
@@ -323,6 +325,7 @@ exp.post("/insertscheda", function(req, res) {
         let scqr = db.prepare("INSERT INTO scheda (Nome, Razza, Classe, Livello, HP, Classe_Armatura, Velocità, Forza, Destrezza, Costituzione, Intelligenza, Saggezza, Carisma, Oro, fkUtente) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         scqr.run(req.body.nome, req.body.razza, req.body.classe, 1, HP, CA, req.body.spd, req.body.str, req.body.dex, req.body.con, req.body.int, req.body.wis, req.body.cha, Gold, id);
         res.send("Scheda creata con successo <a href = '/creascheda'> Torna alla creazione scheda</a>")
+        db.close();
     }
 
 
