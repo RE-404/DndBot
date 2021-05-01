@@ -6,6 +6,7 @@ const Database = require('better-sqlite3');
 const express = require('express');
 const exp = express();
 const ejs = require('ejs');
+const db = new Database('./DB/Schede.db', { verbose: console.log });
 const port = process.env.PORT || 3000;
 const bot = new TelegramBot(token, {
     polling: true
@@ -84,7 +85,6 @@ bot.onText(/\/roll/, (msg, match) => {
 //#endregion
 
 bot.onText(/\/caricascheda/, (msg) => {
-    const db = new Database('../DB/Schede.db', { verbose: console.log });
     console.log(msg.chat.id);
     bot.sendMessage(msg.chat.id, "Scrivi il nome e la razza del personaggio che vuoi caricare")
     const row = db.prepare('SELECT Nome, Razza FROM scheda INNER JOIN utente ON utente.idUtente=scheda.fkUtente WHERE utente.chatid = ?').all(msg.chat.id);
@@ -113,7 +113,6 @@ bot.onText(/\/caricascheda/, (msg) => {
 });
 
 bot.onText(/\/register/, (msg) => {
-    const db = new Database('../DB/Schede.db', { verbose: console.log });
     bot.sendMessage(msg.chat.id, "Scrivi il tuo username e la password (spazi in user e password non consentiti, usa i _)");
     let handler = (msg) => {
         let spl = msg.text.split(" ");
@@ -301,7 +300,6 @@ exp.get("/", function(req, res) {
     res.render("login");
 });
 exp.post("/", function(req, res) {
-    const db = new Database('../DB/Schede.db', { verbose: console.log });
     let login = db.prepare("SELECT * FROM utente WHERE username = ? AND password = ?").get(req.body.user, req.body.password);
     if (login) {
         global.id = login.idUtente;
@@ -309,11 +307,11 @@ exp.post("/", function(req, res) {
     } else {
         res.send("Password o user non corretti <a href = '/'> Torna al login</a>");
     }
+    db.close();
 });
 
 exp.post("/insertscheda", function(req, res) {
     if (req.body) {
-        const db = new Database('../DB/Schede.db', { verbose: console.log });
         let modde, modco;
         modde = DeterminaMod(parseInt(req.body.dex));
         modco = DeterminaMod(parseInt(req.body.con));
