@@ -1,0 +1,23 @@
+{
+  "name": "dndbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^7.1.5",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "express-basic-auth": "^1.2.0",
+    "express-session": "^1.17.1",
+    "node-telegram-bot-api": "^0.51.0",
+    "random": "^3.0.3",
+    "request": "^2.88.2",
+    "save": "^2.4.0",
+    "sqlite3": "^5.0.2"
+  }
+}

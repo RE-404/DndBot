@@ -1,0 +1,63 @@
+<header>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" \>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</header>
+
+<body>
+    <h3>Campi scheda</h3>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="inputNome">Nome</label>
+            <input class="form-control" id="inputNome" name="nome" placeholder="Nome...">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="razza">Razza</label>
+            <select id="inputRazza" class="form-control" name="razza">
+                <option selected>Scegli una razza</option>
+                <option value="Dragonide">Dragonide</option>
+                <option value="Elfo">Elfo</option>
+                <option value="Gnomo">Gnomo</option>
+                <option value="Halfling">Halfling</option>
+                <option value="Mezzelfo">Mezzelfo</option>
+                <option value="Mezzorco">Mezzorco</option>
+                <option value="Nano">Nano</option>
+                <option value="Tiefling">Tiefling</option>
+                <option value="Umano">Umano</option>
+              </select>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="classe">Classe</label>
+            <select id="inputClasse" class="form-control" name="classe">
+          <option selected>Scegli una classe</option>
+          <option value="Barbaro">Barbaro</option>
+          <option value="Ladro">Ladro</option>
+          <option value="Guerriero">Guerriero</option>
+          <option value="Bardo">Bardo</option>
+          <option value="Druido">Druido</option>
+          <option value="Mago">Mago</option>
+          <option value="Warlock">Warlock</option>
+          <option value="Stregone">Stregone</option>
+          <option value="Chierico">Chierico</option>
+          <option value="Monaco">Monaco</option>
+          <option value="Paladino">Paladino</option>
+          <option value="Artefice">Artefice</option>
+          <option value="Ranger">Ranger</option>
+        </select>
+        </div>
+    </div>
+    <h3>Caratteristiche</h3>
+    <div>
+        Forza<input type="number" value="10" min="1" max="18" step="1" name="str"> Destrezza
+        <input type="number" value="10" min="1" max="18" step="1" name="dex"> Costituzione
+        <input type="number" value="10" min="1" max="18" step="1" name="con"> Intelligenza
+        <input type="number" value="10" min="1" max="18" step="1" name="int"> Saggezza
+        <input type="number" value="10" min="1" max="18" step="1" name="wis"> Carisma
+        <input type="number" value="10" min="1" max="18" step="1" name="cha">Velocità
+        <input type="number" value="30" min="30" max="35" step="5" name="spd">
+    </div>
+</body>
