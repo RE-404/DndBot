@@ -121,8 +121,8 @@ bot.onText(/\/register/, (msg) => {
         } else {
             var stmt = db.prepare("INSERT INTO utente (username, password, chatid) VALUES (?,?,?)");
             stmt.run(spl[0].toString(), spl[1].toString(), parseInt(msg.chat.id));
-            let stringasito = "http://127.0.0.1:3000";
-            let link = stringasito.link("http://127.0.0.1:3000");
+            let stringasito = "https://telegramdnd.herokuapp.com";
+            let link = stringasito.link("https://telegramdnd.herokuapp.com");
             console.log(link + " " + stringasito);
             bot.sendMessage(msg.chat.id, "Adesso puoi creare le tue schede personaggio da " + link, { parse_mode: 'HTML' });
         }
