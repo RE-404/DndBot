@@ -62,13 +62,13 @@ bot.onText(/\/roll/, (msg, match) => {
         return;
     }
 
-    if (sum == 20 && type == '20') {
+    if (sum == 20 && type == '20' && quant == '1') {
         bot.sendMessage(
             msg.chat.id,
             sum + " CRITICO!",
         );
         return;
-    } else if (sum == 1 && type == '20') {
+    } else if (sum == 1 && type == '20' && quant == '1') {
         bot.sendMessage(
             msg.chat.id,
             sum + " ¯\\_(ツ)_/¯",
@@ -84,39 +84,48 @@ bot.onText(/\/roll/, (msg, match) => {
 //#endregion
 
 bot.onText(/\/caricascheda/, (msg) => {
-    const db = new Database('./DB/Schede.db', { verbose: console.log });
-    bot.sendMessage(msg.chat.id, "Scrivi il nome, la razza e la classe del personaggio che vuoi caricare")
-    const row = db.prepare('SELECT Nome, Razza, Classe FROM scheda INNER JOIN utente ON utente.idUtente=scheda.fkUtente WHERE utente.chatid = ?').all(msg.chat.id);
-    if (row) {
+    let db = new Database('./DB/Schede.db', { verbose: console.log });
+    let row = db.prepare('SELECT Nome, Razza, Classe FROM scheda INNER JOIN utente ON utente.idUtente=scheda.fkUtente WHERE utente.chatid = ?').all(msg.chat.id);
+    if (row.length != 0) {
+        bot.sendMessage(msg.chat.id, "Scrivi il nome, la razza e la classe del personaggio che vuoi caricare")
         let ans = "";
-        row.forEach(x => ans += (x.Nome + " " + x.Razza + "\n"));
+        row.forEach(x => ans += (x.Nome + " " + x.Razza + " " + x.Classe + "\n"));
         bot.sendMessage(msg.chat.id, ans);
         let handler = (msg) => {
             let spl = msg.text.split(" ");
-            const row1 = db.prepare("SELECT * FROM scheda WHERE Nome=? AND Razza=?").all(spl[0].toString(), spl[1].toString());
-            let ans = "";
-            let stats = [row1[0].Forza, row1[0].Destrezza, row1[0].Costituzione, row1[0].Intelligenza, row1[0].Saggezza, row1[0].Carisma];
-            let mods = [];
-            for (i = 0; i < 6; i++) {
-                mods.push(DeterminaMod(stats[i]));
-                console.log(mods[i]);
+            if (spl[0] != null && spl[1] != null && spl[2] != null) {
+                var row1 = db.prepare("SELECT * FROM scheda WHERE Nome=? AND Razza=? AND Classe = ?").all(spl[0].toString(), spl[1].toString(), spl[2].toString());
+                if (row1.length != 0) {
+                    let ans = "";
+                    let stats = [row1[0].Forza, row1[0].Destrezza, row1[0].Costituzione, row1[0].Intelligenza, row1[0].Saggezza, row1[0].Carisma];
+                    let mods = [];
+                    for (i = 0; i < 6; i++) {
+                        mods.push(DeterminaMod(stats[i]));
+                        console.log(mods[i]);
+                    }
+                    console.log(mods);
+                    console.log(stats);
+                    row1.forEach(x => ans += (x.Nome + '\n' + x.Razza + '\n' + x.Classe + "\nLivello: " + x.Livello + "\nHP: " + x.HP + "\nClasse Armatura: " + x.Classe_Armatura + "\nVelocità: " + x.Velocità + "\nForza: " + x.Forza + " (" + mods[0] + ")" + "\nDestrezza: " + x.Destrezza + " (" + mods[1] + ")" + "\nCostituzione: " + x.Costituzione + " (" + mods[2] + ")" + "\nIntelligenza: " + x.Intelligenza + " (" + mods[3] + ")" + "\nSaggezza: " + x.Saggezza + " (" + mods[4] + ")" + "\nCarisma: " + x.Carisma + " (" + mods[5] + ")" + "\nOro: " + x.Oro));
+                    bot.sendMessage(msg.chat.id, ans);
+                    bot.removeListener("message", handler);
+                    db.close();
+                } else {
+                    bot.sendMessage(msg.chat.id, "Scheda non trovata");
+                    bot.removeListener("message", handler);
+                }
+            } else {
+                bot.sendMessage(msg.chat.id, "Devi scrivere tutti e 3 i parametri");
             }
-            console.log(mods);
-            console.log(stats);
-            row1.forEach(x => ans += (x.Nome + '\n' + x.Razza + '\n' + x.Classe + "\nLivello: " + x.Livello + "\nHP: " + x.HP + "\nClasse Armatura: " + x.Classe_Armatura + "\nVelocità: " + x.Velocità + "\nForza: " + x.Forza + " (" + mods[0] + ")" + "\nDestrezza: " + x.Destrezza + " (" + mods[1] + ")" + "\nCostituzione: " + x.Costituzione + " (" + mods[2] + ")" + "\nIntelligenza: " + x.Intelligenza + " (" + mods[3] + ")" + "\nSaggezza: " + x.Saggezza + " (" + mods[4] + ")" + "\nCarisma: " + x.Carisma + " (" + mods[5] + ")" + "\nOro: " + x.Oro));
-            bot.sendMessage(msg.chat.id, ans);
-            bot.removeListener("message", handler);
-        };
+        }
         bot.on("message", handler);
     } else {
         bot.sendMessage(msg.chat.id, "Non hai schede");
-        return;
     }
-    db.close();
 });
 
+
 bot.onText(/\/register/, (msg) => {
-    const db = new Database('./DB/Schede.db', { verbose: console.log });
+    let db = new Database('./DB/Schede.db', { verbose: console.log });
     bot.sendMessage(msg.chat.id, "Scrivi il tuo username e la password (spazi in user e password non consentiti, usa i _)");
     let handler = (msg) => {
         let spl = msg.text.split(" ");
@@ -128,13 +137,12 @@ bot.onText(/\/register/, (msg) => {
             stmt.run(spl[0].toString(), spl[1].toString(), parseInt(msg.chat.id));
             let stringasito = "https://telegramdnd.herokuapp.com";
             let link = stringasito.link("https://telegramdnd.herokuapp.com");
-            console.log(link + " " + stringasito);
             bot.sendMessage(msg.chat.id, "Adesso puoi creare le tue schede personaggio da " + link, { parse_mode: 'HTML' });
+            db.close();
         }
         bot.removeListener("message", handler);
     };
     bot.on("message", handler);
-    db.close();
 });
 
 //#region magic related stuff
@@ -153,33 +161,38 @@ bot.onText(/\/listamagie/, (msg) => {
 
 bot.onText(/\/wikimagie/, (msg, match) => {
     let text = match.input.slice(11, msg.text.length).toLowerCase();
-    console.log(text);
-    let src = text.split(' ').join('-');
-    console.log(src);
-    request('https://www.dnd5eapi.co/api/spells/' + src, function(error, response, body) {
-        console.error('error:', error);
-        console.log('statusCode:', response && response.statusCode);
-        let json = JSON.parse(body);
-        if (json.material && json.higher_level) {
-            let stringa = json.name + "\n\nSchool and level: " + json.school.name + " " + json.level + "\n\nCasting time: " + json.casting_time + "\n\nRange: " + json.range + "\n\nComponents and materials: " + json.components + " " + json.material + "\n\nDuration: " + json.duration + "\n\n" + json.desc + "\n\nDamage at higher slot level: " + json.higher_level;
-            bot.sendMessage(msg.chat.id, stringa);
-        }
-        if (!json.material && json.higher_level) {
-            let stringa = json.name + "\n\nSchool and level: " + json.school.name + " " + json.level + "\n\nCasting time: " + json.casting_time + "\n\nRange: " + json.range + "\n\nComponents: " + json.components + "\n\nDuration: " + json.duration + "\n\n" + json.desc + "\n\nDamage at higher slot level: " + json.higher_level;
-            bot.sendMessage(msg.chat.id, stringa);
-        }
-        if (!json.material && !json.higher_level) {
-            let stringa = json.name + "\n\nSchool and level: " + json.school.name + " " + json.level + "\n\nCasting time: " + json.casting_time + "\n\nRange: " + json.range + "\n\nComponents: " + json.components + "\n\nDuration: " + json.duration + "\n\n" + json.desc;
-            bot.sendMessage(msg.chat.id, stringa);
-        }
-        if (json.material && !json.higher_level) {
-            let stringa = json.name + "\n\nSchool and level: " + json.school.name + " " + json.level + "\n\nCasting time: " + json.casting_time + "\n\nRange: " + json.range + "\n\nComponents: " + json.components + "\n\nDuration: " + json.duration + "\n\n" + json.desc;
-            bot.sendMessage(msg.chat.id, stringa);
-        }
-
-
-
-    });
+    if (text.length != 0) {
+        console.log(text);
+        let src = text.split(' ').join('-');
+        console.log(src);
+        request('https://www.dnd5eapi.co/api/spells/' + src, function(error, response, body) {
+            console.error('error:', error);
+            console.log('statusCode:', response && response.statusCode);
+            if (response.statusCode != 404 && error == null) {
+                let json = JSON.parse(body);
+                if (json.material && json.higher_level) {
+                    let stringa = json.name + "\n\nSchool and level: " + json.school.name + " " + json.level + "\n\nCasting time: " + json.casting_time + "\n\nRange: " + json.range + "\n\nComponents and materials: " + json.components + " " + json.material + "\n\nDuration: " + json.duration + "\n\n" + json.desc + "\n\nDamage at higher slot level: " + json.higher_level;
+                    bot.sendMessage(msg.chat.id, stringa);
+                }
+                if (!json.material && json.higher_level) {
+                    let stringa = json.name + "\n\nSchool and level: " + json.school.name + " " + json.level + "\n\nCasting time: " + json.casting_time + "\n\nRange: " + json.range + "\n\nComponents: " + json.components + "\n\nDuration: " + json.duration + "\n\n" + json.desc + "\n\nDamage at higher slot level: " + json.higher_level;
+                    bot.sendMessage(msg.chat.id, stringa);
+                }
+                if (!json.material && !json.higher_level) {
+                    let stringa = json.name + "\n\nSchool and level: " + json.school.name + " " + json.level + "\n\nCasting time: " + json.casting_time + "\n\nRange: " + json.range + "\n\nComponents: " + json.components + "\n\nDuration: " + json.duration + "\n\n" + json.desc;
+                    bot.sendMessage(msg.chat.id, stringa);
+                }
+                if (json.material && !json.higher_level) {
+                    let stringa = json.name + "\n\nSchool and level: " + json.school.name + " " + json.level + "\n\nCasting time: " + json.casting_time + "\n\nRange: " + json.range + "\n\nComponents: " + json.components + "\n\nDuration: " + json.duration + "\n\n" + json.desc;
+                    bot.sendMessage(msg.chat.id, stringa);
+                }
+            } else {
+                bot.sendMessage(msg.chat.id, "Magia non trovata");
+            }
+        });
+    } else {
+        bot.sendMessage(msg.chat.id, "Devi scrivere qualcosa");
+    }
 });
 //#endregion
 
@@ -199,22 +212,31 @@ bot.onText(/\/listamostri/, (msg) => {
 
 bot.onText(/\/wikimostri/, (msg, match) => {
     let text = match.input.slice(12, msg.text.length).toLowerCase();
-    console.log(text);
-    let src = text.replace(/ /g, "-");
-    console.log(src);
-    request('https://www.dnd5eapi.co/api/monsters/' + src, function(error, response, body) {
-        console.error('error:', error);
-        console.log('statusCode:', response && response.statusCode);
-        let json = JSON.parse(body);
-        let str;
-        if (json.subtype) {
-            str = json.subtype;
-        } else
-            str = "";
+    if (text.length != 0) {
+        console.log(text);
+        let src = text.replace(/ /g, "-");
+        console.log(src);
+        request('https://www.dnd5eapi.co/api/monsters/' + src, function(error, response, body) {
+            console.error('error:', error);
+            console.log('statusCode:', response && response.statusCode);
+            if (response.statusCode != 404 && error == null) {
+                let json = JSON.parse(body);
+                let str;
+                if (json.subtype) {
+                    str = json.subtype;
+                } else
+                    str = "";
 
-        let stringa = json.name + "\n" + json.size + " " + json.type + " " + str + "\nArmor Class: " + json.armor_class + "\nHP: " + json.hit_points + "\nStrength: " + json.strength + ", Dexterity: " + json.dexterity + ", Constitution: " + json.intelligence + ", Wisdom: " + json.wisdom + ", Charisma: " + json.charisma + "\nLanguages: " + json.languages + "\nChallenge rating: " + json.challenge_rating + "\nDamage immunities: " + json.damage_immunities + "\nDamage vulnerabilities: " + json.damage_vulnerabilities + "\nDamage Resistances: " + json.damage_resistances;
-        bot.sendMessage(msg.chat.id, stringa);
-    });
+                let stringa = json.name + "\n" + json.size + " " + json.type + " " + str + "\nArmor Class: " + json.armor_class + "\nHP: " + json.hit_points + "\nStrength: " + json.strength + "\nDexterity: " + json.dexterity + "\nConstitution: " + json.intelligence + "\nWisdom: " + json.wisdom + "\nCharisma: " + json.charisma + "\nLanguages: " + json.languages + "\nChallenge rating: " + json.challenge_rating + "\nDamage immunities: " + json.damage_immunities + "\nDamage vulnerabilities: " + json.damage_vulnerabilities + "\nDamage Resistances: " + json.damage_resistances;
+                bot.sendMessage(msg.chat.id, stringa);
+            } else {
+                bot.sendMessage(msg.chat.id, "Mostro non trovato");
+            }
+
+        });
+    } else {
+        bot.sendMessage(msg.chat.id, "Devi scrivere qualcosa");
+    }
 });
 //#endregion
 
@@ -304,10 +326,12 @@ exp.get("/", function(req, res) {
     res.render("login");
 });
 exp.post("/", function(req, res) {
+    let db = new Database('./DB/Schede.db', { verbose: console.log });
     let login = db.prepare("SELECT * FROM utente WHERE username = ? AND password = ?").get(req.body.user, req.body.password);
     if (login) {
         global.id = login.idUtente;
         res.redirect("/creascheda");
+        db.close();
     } else {
         res.send("Password o user non corretti <a href = '/'> Torna al login</a>");
     }
