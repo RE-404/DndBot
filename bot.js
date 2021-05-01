@@ -106,7 +106,6 @@ bot.onText(/\/caricascheda/, (msg) => {
         row1.forEach(x => ans += (x.Nome + '\n' + x.Razza + '\n' + x.Classe + "\nLivello: " + x.Livello + "\nHP: " + x.HP + "\nClasse Armatura: " + x.Classe_Armatura + "\nVelocità: " + x.Velocità + "\nForza: " + x.Forza + " (" + mods[0] + ")" + "\nDestrezza: " + x.Destrezza + " (" + mods[1] + ")" + "\nCostituzione: " + x.Costituzione + " (" + mods[2] + ")" + "\nIntelligenza: " + x.Intelligenza + " (" + mods[3] + ")" + "\nSaggezza: " + x.Saggezza + " (" + mods[4] + ")" + "\nCarisma: " + x.Carisma + " (" + mods[5] + ")" + "\nOro: " + x.Oro));
         bot.sendMessage(msg.chat.id, ans);
         bot.removeListener("message", handler);
-        db.close();
     };
     bot.on("message", handler);
 
@@ -128,7 +127,6 @@ bot.onText(/\/register/, (msg) => {
             bot.sendMessage(msg.chat.id, "Adesso puoi creare le tue schede personaggio da " + link, { parse_mode: 'HTML' });
         }
         bot.removeListener("message", handler);
-        db.close();
     };
     bot.on("message", handler);
 });
@@ -307,7 +305,6 @@ exp.post("/", function(req, res) {
     } else {
         res.send("Password o user non corretti <a href = '/'> Torna al login</a>");
     }
-    db.close();
 });
 
 exp.post("/insertscheda", function(req, res) {
@@ -321,7 +318,6 @@ exp.post("/insertscheda", function(req, res) {
         let scqr = db.prepare("INSERT INTO scheda (Nome, Razza, Classe, Livello, HP, Classe_Armatura, Velocità, Forza, Destrezza, Costituzione, Intelligenza, Saggezza, Carisma, Oro, fkUtente) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         scqr.run(req.body.nome, req.body.razza, req.body.classe, 1, HP, CA, req.body.spd, req.body.str, req.body.dex, req.body.con, req.body.int, req.body.wis, req.body.cha, Gold, id);
         res.send("Scheda creata con successo <a href = '/creascheda'> Torna alla creazione scheda</a>")
-        db.close();
     }
 
 
