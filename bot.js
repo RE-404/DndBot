@@ -88,26 +88,31 @@ bot.onText(/\/caricascheda/, (msg) => {
     console.log(msg.chat.id);
     bot.sendMessage(msg.chat.id, "Scrivi il nome e la razza del personaggio che vuoi caricare")
     const row = db.prepare('SELECT Nome, Razza FROM scheda INNER JOIN utente ON utente.idUtente=scheda.fkUtente WHERE utente.chatid = ?').all(msg.chat.id);
-    let ans = "";
-    row.forEach(x => ans += (x.Nome + " " + x.Razza + "\n"));
-    bot.sendMessage(msg.chat.id, ans);
-    let handler = (msg) => {
-        let spl = msg.text.split(" ");
-        const row1 = db.prepare("SELECT * FROM scheda WHERE Nome=? AND Razza=?").all(spl[0].toString(), spl[1].toString());
+    if (row) {
         let ans = "";
-        let stats = [row1[0].Forza, row1[0].Destrezza, row1[0].Costituzione, row1[0].Intelligenza, row1[0].Saggezza, row1[0].Carisma];
-        let mods = [];
-        for (i = 0; i < 6; i++) {
-            mods.push(DeterminaMod(stats[i]));
-            console.log(mods[i]);
-        }
-        console.log(mods);
-        console.log(stats);
-        row1.forEach(x => ans += (x.Nome + '\n' + x.Razza + '\n' + x.Classe + "\nLivello: " + x.Livello + "\nHP: " + x.HP + "\nClasse Armatura: " + x.Classe_Armatura + "\nVelocità: " + x.Velocità + "\nForza: " + x.Forza + " (" + mods[0] + ")" + "\nDestrezza: " + x.Destrezza + " (" + mods[1] + ")" + "\nCostituzione: " + x.Costituzione + " (" + mods[2] + ")" + "\nIntelligenza: " + x.Intelligenza + " (" + mods[3] + ")" + "\nSaggezza: " + x.Saggezza + " (" + mods[4] + ")" + "\nCarisma: " + x.Carisma + " (" + mods[5] + ")" + "\nOro: " + x.Oro));
+        row.forEach(x => ans += (x.Nome + " " + x.Razza + "\n"));
         bot.sendMessage(msg.chat.id, ans);
-        bot.removeListener("message", handler);
-    };
-    bot.on("message", handler);
+        let handler = (msg) => {
+            let spl = msg.text.split(" ");
+            const row1 = db.prepare("SELECT * FROM scheda WHERE Nome=? AND Razza=?").all(spl[0].toString(), spl[1].toString());
+            let ans = "";
+            let stats = [row1[0].Forza, row1[0].Destrezza, row1[0].Costituzione, row1[0].Intelligenza, row1[0].Saggezza, row1[0].Carisma];
+            let mods = [];
+            for (i = 0; i < 6; i++) {
+                mods.push(DeterminaMod(stats[i]));
+                console.log(mods[i]);
+            }
+            console.log(mods);
+            console.log(stats);
+            row1.forEach(x => ans += (x.Nome + '\n' + x.Razza + '\n' + x.Classe + "\nLivello: " + x.Livello + "\nHP: " + x.HP + "\nClasse Armatura: " + x.Classe_Armatura + "\nVelocità: " + x.Velocità + "\nForza: " + x.Forza + " (" + mods[0] + ")" + "\nDestrezza: " + x.Destrezza + " (" + mods[1] + ")" + "\nCostituzione: " + x.Costituzione + " (" + mods[2] + ")" + "\nIntelligenza: " + x.Intelligenza + " (" + mods[3] + ")" + "\nSaggezza: " + x.Saggezza + " (" + mods[4] + ")" + "\nCarisma: " + x.Carisma + " (" + mods[5] + ")" + "\nOro: " + x.Oro));
+            bot.sendMessage(msg.chat.id, ans);
+            bot.removeListener("message", handler);
+        };
+        bot.on("message", handler);
+    } else {
+        bot.sendMessage(msg.chat.id, "Non hai schede");
+        return;
+    }
 
 });
 
