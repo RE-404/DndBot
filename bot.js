@@ -87,7 +87,7 @@ bot.onText(/\/roll/, (msg, match) => {
 bot.onText(/\/caricascheda/, (msg) => {
     console.log(msg.chat.id);
     bot.sendMessage(msg.chat.id, "Scrivi il nome e la razza del personaggio che vuoi caricare")
-    const row = db.prepare('SELECT Nome, Razza FROM scheda INNER JOIN utente ON utente.idUtente=scheda.fkUtente WHERE utente.chatid = ?').all(msg.chat.id);
+    const row = db.prepare('SELECT Nome, Razza, Classe FROM scheda INNER JOIN utente ON utente.idUtente=scheda.fkUtente WHERE utente.chatid = ?').all(msg.chat.id);
     if (row) {
         let ans = "";
         row.forEach(x => ans += (x.Nome + " " + x.Razza + "\n"));
